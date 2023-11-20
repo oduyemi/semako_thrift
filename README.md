@@ -20,7 +20,7 @@ License
 Clone the repository:
 
 ##### bash
-git clone https://github.com/oduyemi/semako-thrift.git
+git clone https://github.com/oduyemi/semako_thrift.git
 Install dependencies:
 
 ##### bash
