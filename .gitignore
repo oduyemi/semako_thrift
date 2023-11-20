@@ -1,1 +1,8 @@
 /node_modules
+/API/node_modules
+/frontend/node_modules
+
+.env
+/API/.env
+/frontend/.env
+/frontend

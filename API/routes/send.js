@@ -1,14 +1,18 @@
+require('dotenv').config();
 const express = require("express");
 const router = express.Router();
 const crypto = require("crypto");
 const validator = require("validator");
 const twilio = require("twilio");
-const paystack = require("paystack")("sk_live_4186a48786a6d619f052f5c80f8e39f0f7f4c416");
 
 
-const accountSid = "AC6815d4c7b28c28c3fa8ba78855e14dfb";
-const authToken = "caf8de319061e7e13627992f26b483d1";
+
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = twilio(accountSid, authToken);
+const paystackSecretKey = process.env.PAYSTACK_SECRET_KEY;
+
+const paystack = require("paystack")(paystackSecretKey);
 
 const PIN_EXPIRY_TIME = 10 * 60 * 1000;
 
