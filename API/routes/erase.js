@@ -3,23 +3,7 @@ const router = express.Router();
 
 
 
-/**
- * @swagger
- * /docs/resources/delete-resource/{id}:
- *   delete:
- *     summary: Delete a resource material
- *     description: Delete Resource Material (Admin or Contributor)
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: RESOURCE ID
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Resource material deleted successfully
- */
+
  router.delete('/resources/delete-resource/:id', (req, res) => {
     const db = req.db;
     const userRole = req.session.user.role;

@@ -1,19 +1,23 @@
 const mysql = require("mysql");
 
-const db = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: process.env.DB_PASSWORD,
-    database: "semakodb"
-});
 
-db.connect((err) => {
+
+const dbConfig = {
+    host: process.env.DB_HOST || "localhost",
+    user: process.env.DB_USER || "root",
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME || "semakodb",
+  };
+  
+const connection = mysql.createConnection(dbConfig)
+  
+connection.connect((err) => {
     if (err) {
-        console.error("Error connecting to MySQL Database", err);
+      console.error("Error connecting to MySQL Database", err);
     } else {
-        console.log("Connected to MySQL Database");
+      console.log("Connected to MySQL Database");
     }
-});
+  });
 
 
 // Table creation
@@ -90,16 +94,16 @@ const createPaymentTable = `
   );
 `;
 
-db.query(createMemberTable, (err, result) => {
+connection.query(createMemberTable, (err, result) => {
     if (err) {
-        console.error("Error creating Member table", err);
+      console.error("Error creating Member table", err);
     } else {
-        console.log("Member table created successfully");
+      console.log("Member table created successfully");
     }
-}); 
+  });
 
 
-db.query(createSchemeTable, (err, result) => {
+connection.query(createSchemeTable, (err, result) => {
     if (err) {
         console.error("Error creating Scheme table", err);
     } else {
@@ -107,7 +111,7 @@ db.query(createSchemeTable, (err, result) => {
     }
 }); 
 
-db.query(createTransactionTable, (err, result) => {
+connection.query(createTransactionTable, (err, result) => {
     if (err) {
         console.error("Error creating Transaction table", err);
     } else {
@@ -115,7 +119,7 @@ db.query(createTransactionTable, (err, result) => {
     }
 }); 
 
-db.query(createEnrollmentTable, (err, result) => {
+connection.query(createEnrollmentTable, (err, result) => {
     if (err) {
         console.error("Error creating Enrollment table", err);
     } else {
@@ -123,7 +127,7 @@ db.query(createEnrollmentTable, (err, result) => {
     }
 }); 
 
-db.query(createFeeTable, (err, result) => {
+connection.query(createFeeTable, (err, result) => {
     if (err) {
         console.error("Error creating Fee table", err);
     } else {
@@ -131,17 +135,24 @@ db.query(createFeeTable, (err, result) => {
     }
 }); 
 
-db.query(createPaymentTable, (err, results) => {
+connection.query(createPaymentTable, (err, results) => {
     if (err) {
       console.error('Error creating Payment table:', err);
     } else {
       console.log('Payment table created successfully');
     }
   });
-
-
-
-module.exports = (req, res, next) => {
-    req.db = db;
-    next();
-};
+  
+  module.exports = {
+    query: (sql, values) => {
+      return new Promise((resolve, reject) => {
+        connection.query(sql, values, (err, results) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(results);
+          }
+        });
+      });
+    },
+  };

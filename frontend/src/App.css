@@ -1,0 +1,20 @@
+*{
+  box-sizing: border-box;
+  margin: 0px;
+  padding: 0px;
+  font-family: 'lato', sans-serif;
+  font-size: 12px;
+}
+
+body{
+  overflow-x: hidden;
+  background-color: #003459;
+}
+
+.App {
+  color: #000;
+}
+
+#root{
+  height: 100%;
+}

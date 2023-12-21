@@ -1,11 +1,10 @@
 require('dotenv').config();
 const express = require("express");
+const cors = require("cors");
 const router = express.Router();
 const crypto = require("crypto");
 const validator = require("validator");
 const twilio = require("twilio");
-
-
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
@@ -47,7 +46,7 @@ async function sendSMSVerification(pin, phoneNumber) {
       from: "+12052361255"
     });
     console.log(message.sid);
-    return true; // Success
+    return true; 
   } catch (error) {
     console.error(error);
     return false; // Error
@@ -72,16 +71,6 @@ router.post("/sms-status", (req, res) => {
 });
 
 
-/**
- * @swagger
- * /docs/register:
- *   post:
- *     summary: Creates a new member
- *     description: Create a new member in Semako Thrifting Union
- *     responses:
- *       200:
- *         description: Member created successfully
- */
 router.post("/register", async (req, res) => {
   try {
     const { fname, lname, phone, address, password, confirmPassword } = req.body;
@@ -94,7 +83,7 @@ router.post("/register", async (req, res) => {
     }
 
     const checkPhoneQuery = "SELECT * FROM Member WHERE Phone = ?";
-    db.query(checkPhoneQuery, [phone], async function (err, results) {
+    req.db.query(checkPhoneQuery, [phone], async function (err, results) {
       if (err) {
         return res.status(500).json({ message: "Error checking phone" });
       }
@@ -150,16 +139,6 @@ router.post("/register", async (req, res) => {
 });
 
 
-/**
- * @swagger
- * /docs/login:
- *   post:
- *     summary: Logs in a user
- *     description: Logs in a user in Global Educom
- *     responses:
- *       200:
- *         description: Login successfully
- */
 router.post("/login", async (req, res) => {
   try {
     const { phone, password } = req.body;
@@ -168,7 +147,7 @@ router.post("/login", async (req, res) => {
     }
 
     const checkPhoneQuery = "SELECT * FROM Member WHERE Phone = ?";
-    db.query(checkPhoneQuery, [phone], async (err, results) => {
+    req.db.query(checkPhoneQuery, [phone], async (err, results) => {
       if (err) {
         return res.status(500).json({ message: "Error checking member" });
       }
@@ -216,16 +195,7 @@ router.post("/login", async (req, res) => {
 });
 
 
-/**
- * @swagger
- * /docs/members/member/make-payment:
- *   post:
- *     summary: Initiates a new payment
- *     description: Initiate a new payment for a member in Semako Thrifting Union
- *     responses:
- *       200:
- *         description: Payment initiated successfully
- */
+
 router.post("/members/member/make-payment", async (req, res) => {
   try {
     const { memberId, amount, email } = req.body;
@@ -235,7 +205,7 @@ router.post("/members/member/make-payment", async (req, res) => {
     }
 
     const memberQuery = "SELECT * FROM Member WHERE MemberID = ?";
-    db.query(memberQuery, [memberId], async (err, results) => {
+    req.db.query(memberQuery, [memberId], async (err, results) => {
       if (err) {
         return res.status(500).json({ message: "Error fetching member details" });
       }
@@ -247,7 +217,7 @@ router.post("/members/member/make-payment", async (req, res) => {
       const member = results[0];
 
       const paymentObject = {
-        amount: amount * 100, // Paystack API expects amount in kobo
+        amount: amount * 100, //  amount in kobo
         email,
         metadata: {
           memberId: member.MemberID,
@@ -258,7 +228,7 @@ router.post("/members/member/make-payment", async (req, res) => {
       try {
         const paymentResponse = await paystack.initializeTransaction(paymentObject);
         const insertPaymentQuery = "INSERT INTO Payment (MemberID, TransactionID, Amount, Status) VALUES (?, ?, ?, ?)";
-        db.query(insertPaymentQuery, [memberId, paymentResponse.data.reference, amount, "pending"], (err, result) => {
+        req.db.query(insertPaymentQuery, [memberId, paymentResponse.data.reference, amount, "pending"], (err, result) => {
           if (err) {
             console.error("Error storing payment details:", err);
           } else {
@@ -329,16 +299,7 @@ function handleFailedPayment(data) {
   console.log(`Payment failed for transaction ${transactionId}. Customer: ${customerEmail}`);
 }
 
-/**
- * @swagger
- * /docs/members/member/enroll-scheme:
- *   post:
- *     summary: Initiates scheme enrollment
- *     description: Initiate scheme enrollment for a member in Semako Thrifting Union
- *     responses:
- *       200:
- *         description: Scheme Enrolled successfully
- */
+
 router.post("/members/member/enroll-scheme", async (req, res) => {
   try {
     const { memberId, schemeId } = req.body;
@@ -372,16 +333,7 @@ router.post("/members/member/enroll-scheme", async (req, res) => {
 });
 
 
-/**
- * @swagger
- * /docs/deduct-fees:
- *   post:
- *     summary: Initiates fees deduction
- *     description: Initiate fees deduction for members in Semako Thrifting Union
- *     responses:
- *       200:
- *         description: Fees Deducted successfully
- */
+
 router.post("/deduct-fees", async (req, res) => {
   try {
     const currentDate = new Date().toISOString().split("T")[0];
@@ -424,15 +376,6 @@ router.post("/deduct-fees", async (req, res) => {
 });
 
 
-/**
- * @swagger
- * /docs/deduct-fees:
- *   post:
- *     summary: Deducts fees from member accounts and sends SMS notifications.
- *     responses:
- *       200:
- *         description: Fees deducted successfully
- */
 router.post("/deduct-fees", async (req, res) => {
   try {
     const currentDate = new Date().toISOString().split("T")[0];
@@ -454,7 +397,7 @@ router.post("/deduct-fees", async (req, res) => {
           } else {
             console.log(`Deducted fee (${fee.Name}) from member accounts successfully`);
 
-            const memberId = updateResult.insertId; // Adjust this based on your database structure
+            const memberId = updateResult.insertId; 
             const getMemberPhoneQuery = "SELECT Phone FROM Member WHERE MemberID = ?";
             db.query(getMemberPhoneQuery, [memberId], async (phoneErr, phoneResults) => {
               if (phoneErr || phoneResults.length === 0) {
@@ -492,12 +435,6 @@ router.post("/deduct-fees", async (req, res) => {
     return res.status(500).json({ message: "Error deducting fees" });
   }
 });
-
-module.exports = router;
-
-      
-
-
 
 
 
