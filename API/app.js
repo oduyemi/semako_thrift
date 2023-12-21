@@ -2,8 +2,8 @@ const express = require("express");
 const http = require('http');
 const WebSocket = require('ws');
 const cors = require("cors");  // Move this line here
-const swaggerJsdoc = require("swagger-jsdoc");
-const swaggerUi = require("swagger-ui-express");
+// const swaggerJsdoc = require("swagger-jsdoc");
+// const swaggerUi = require("swagger-ui-express");
 const { connection, createSessionConnection } = require("./db");
 const fetchRouter = require("./routes/fetch");
 const sendRouter = require("./routes/send");
@@ -83,7 +83,7 @@ const options = {
 };
 
 
-const specs = swaggerJsdoc(options);
+// const specs = swaggerJsdoc(options);
 
 const authenticateSession = (req, res, next) => {
   if (!req.session.member) {
